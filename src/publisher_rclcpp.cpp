@@ -64,14 +64,14 @@ int main(int argc, char *argv[])
 	executor1.add_node(node1);
 	std::thread spinThread([&executor1]()
 						   { executor1.spin(); });
-
+	std::cout << "rclcpp thread started" << std::endl;
 
 	// running the rclpy subscriber node from python and blocking the main thread
 	PyObject* obj = PyObject_CallObject(py_class, NULL);
 
+	Py_Finalize();
 	// If node is interrupted, destroy the node and shutdown rclcpp
 	std::cout << "Bye Bye, world!" << std::endl;
-	Py_Finalize();
 	rclcpp::shutdown();
 	return 0;
 }

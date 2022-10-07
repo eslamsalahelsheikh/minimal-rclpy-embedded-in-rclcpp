@@ -3,7 +3,15 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
+import threading
 
+class SpinThread(threading.Thread):
+    def __init__(self, node):
+        threading.Thread.__init__(self)
+        self.node = node
+
+    def run(self):
+        rclpy.spin(self.node)
 
 class MinimalSubscriber(Node):
 
@@ -16,8 +24,9 @@ class MinimalSubscriber(Node):
             self.listener_callback,
             10)
         self.subscription  # prevent unused variable warning
-
-        rclpy.spin(self)
+        SpinThread(self).start()
+        print ("rclpy thread started")
+        # rclpy.spin(self)
 
 
     def listener_callback(self, msg):
