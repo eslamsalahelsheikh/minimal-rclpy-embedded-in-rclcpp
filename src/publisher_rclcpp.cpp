@@ -7,8 +7,10 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "Python.h"
+#include <pybind11/embed.h> 
 
 using namespace std::chrono_literals;
+namespace py = pybind11;
 
 class MinimalPublisher : public rclcpp::Node
 {
@@ -37,23 +39,11 @@ private:
 int main(int argc, char *argv[])
 {
 
-	Py_Initialize();
-	PyObject *pName = PyUnicode_FromString("python_pkg.subscriber_rclpy");
+	py::scoped_interpreter guard{}; // start the interpreter and keep it alive
 
-	PyObject *pModule = PyImport_Import(pName);
-	if (!pModule)
-	{
-		printf("PyImport_Import script.py failed!\n");
-		return 1;
-	}
-	// getting all attributes of the module
-	PyObject *dict = PyModule_GetDict(pModule);
+	// import the python module
+	py::module py_sub = py::module::import("python_pkg.subscriber_rclpy");
 
-	// getting this subscriber class
-	std::string py_class_name = "MinimalSubscriber";
-	PyObject *py_class = PyDict_GetItemString(dict, py_class_name.c_str());
-
-	// creating an instance of the class
 
 
 	// starting the rclcpp node 
@@ -66,10 +56,11 @@ int main(int argc, char *argv[])
 						   { executor1.spin(); });
 	std::cout << "rclcpp thread started" << std::endl;
 
-	// running the rclpy subscriber node from python and blocking the main thread
-	PyObject* obj = PyObject_CallObject(py_class, NULL);
 
-	Py_Finalize();
+	// creating an instance of the class
+	// running the rclpy subscriber node from python and blocking the main thread
+	py::object object = py_sub.attr("MinimalSubscriber")();
+
 	// If node is interrupted, destroy the node and shutdown rclcpp
 	std::cout << "Bye Bye, world!" << std::endl;
 	rclcpp::shutdown();

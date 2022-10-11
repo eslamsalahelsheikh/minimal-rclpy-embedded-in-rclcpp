@@ -24,9 +24,9 @@ class MinimalSubscriber(Node):
             self.listener_callback,
             10)
         self.subscription  # prevent unused variable warning
-        SpinThread(self).start()
+        # SpinThread(self).start()
         print ("rclpy thread started")
-        # rclpy.spin(self)
+        rclpy.spin(self)
 
 
     def listener_callback(self, msg):
